@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="740" viewBox="0 0 1500 740" font-family="Helvetica, Arial, sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5363"/></marker></defs>
+<rect width="1500" height="740" fill="#ffffff"/>
+<text x="30" y="38" text-anchor="start" font-size="20" font-weight="700" fill="#1c2230">Plant - functional view (signal level)</text>
+<text x="30" y="60" text-anchor="start" font-size="12.5" font-weight="400" fill="#5b6577">Dashed pills are signals taken from the Vehicle Body (drawn as tags to avoid long wires).</text>
+<rect x="250" y="78" width="150" height="26" rx="13.0" fill="#ffffff" stroke="#5b6577" stroke-width="1.3" stroke-dasharray="4 3"/>
+<text x="325.0" y="95.0" text-anchor="middle" font-size="12" fill="#2a303c">Fz x4  (Body)</text>
+<rect x="735" y="78" width="110" height="26" rx="13.0" fill="#ffffff" stroke="#5b6577" stroke-width="1.3" stroke-dasharray="4 3"/>
+<text x="790.0" y="95.0" text-anchor="middle" font-size="12" fill="#2a303c">vx  (Body)</text>
+<rect x="250" y="120" width="270" height="90" rx="8" fill="#fff4e0" stroke="#e08a00" stroke-width="1.6"/>
+<text x="385.0" y="152.0" text-anchor="middle" font-size="14" font-weight="700" fill="#3a2500">f1_engine_cmd</text>
+<text x="385.0" y="170.0" text-anchor="middle" font-size="12" fill="#3a2500" font-family="Menlo, Consolas, monospace">grip limit (friction circle)</text>
+<text x="385.0" y="188.0" text-anchor="middle" font-size="12" fill="#3a2500">+ rev limiter 14-15k rpm</text>
+<rect x="700" y="120" width="260" height="90" rx="8" fill="#fff4e0" stroke="#e08a00" stroke-width="1.6"/>
+<text x="830.0" y="161.0" text-anchor="middle" font-size="14" font-weight="700" fill="#3a2500">f1_shift_logic</text>
+<text x="830.0" y="179.0" text-anchor="middle" font-size="12" fill="#3a2500" font-family="Menlo, Consolas, monospace">up 11 000 rpm / down 8 500 rpm</text>
+<path d="M325,104 L325,120" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M790,104 L790,120" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="40" y="132" width="170" height="26" rx="13.0" fill="#ffffff" stroke="#5b6577" stroke-width="1.3" stroke-dasharray="4 3"/>
+<text x="125.0" y="149.0" text-anchor="middle" font-size="12" fill="#2a303c">TrqCmd_req  (input)</text>
+<path d="M210,145 L250,145" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M700,165 L520,165" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="592.2" y="141" width="35.6" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="610" y="154" text-anchor="middle" font-size="11.5" fill="#2a303c">Gear</text>
+<rect x="250" y="300" width="220" height="90" rx="8" fill="#ffeedd" stroke="#ee7a1c" stroke-width="1.6"/>
+<text x="360.0" y="332.0" text-anchor="middle" font-size="14" font-weight="700" fill="#3a1d00">Mapped SI Engine</text>
+<text x="360.0" y="350.0" text-anchor="middle" font-size="12" fill="#3a1d00">torque map x 0.91</text>
+<text x="360.0" y="368.0" text-anchor="middle" font-size="12" fill="#3a1d00">(about 740 kW at 12 000 rpm)</text>
+<rect x="560" y="300" width="250" height="90" rx="8" fill="#ffeedd" stroke="#ee7a1c" stroke-width="1.6"/>
+<text x="685.0" y="332.0" text-anchor="middle" font-size="14" font-weight="700" fill="#3a1d00">Fixed-gear transmission</text>
+<text x="685.0" y="350.0" text-anchor="middle" font-size="12" fill="#3a1d00">gears 2-8, final drive 4.0</text>
+<text x="685.0" y="368.0" text-anchor="middle" font-size="12" fill="#3a1d00">efficiency 0.9</text>
+<rect x="900" y="300" width="200" height="90" rx="8" fill="#ffeedd" stroke="#ee7a1c" stroke-width="1.6"/>
+<text x="1000.0" y="341.0" text-anchor="middle" font-size="14" font-weight="700" fill="#3a1d00">Limited slip diff.</text>
+<text x="1000.0" y="359.0" text-anchor="middle" font-size="12" fill="#3a1d00">preload 2500 N</text>
+<rect x="1190" y="300" width="250" height="90" rx="8" fill="#fff6cf" stroke="#d4a900" stroke-width="1.6"/>
+<text x="1315.0" y="341.0" text-anchor="middle" font-size="14" font-weight="700" fill="#3a3000">4 x Combined Slip Wheel</text>
+<text x="1315.0" y="359.0" text-anchor="middle" font-size="12" fill="#3a3000">Magic Formula Fx + disc brake</text>
+<path d="M290,210 L290,300" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="265.8" y="246" width="48.400000000000006" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="290" y="259" text-anchor="middle" font-size="11.5" fill="#2a303c">TrqCmd</text>
+<path d="M430,300 L430,210" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="405.8" y="246" width="48.400000000000006" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="430" y="259" text-anchor="middle" font-size="11.5" fill="#2a303c">EngSpd</text>
+<path d="M470,345 L560,345" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="490.8" y="321" width="48.400000000000006" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="515" y="334" text-anchor="middle" font-size="11.5" fill="#2a303c">torque</text>
+<path d="M810,345 L900,345" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="830.8" y="321" width="48.400000000000006" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="855" y="334" text-anchor="middle" font-size="11.5" fill="#2a303c">torque</text>
+<path d="M1100,345 L1190,345" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="1120.8" y="321" width="48.400000000000006" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="1145" y="334" text-anchor="middle" font-size="11.5" fill="#2a303c">torque</text>
+<path d="M790,210 L790,300" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="772.2" y="246" width="35.6" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="790" y="259" text-anchor="middle" font-size="11.5" fill="#2a303c">Gear</text>
+<rect x="1230" y="78" width="170" height="26" rx="13.0" fill="#ffffff" stroke="#5b6577" stroke-width="1.3" stroke-dasharray="4 3"/>
+<text x="1315.0" y="95.0" text-anchor="middle" font-size="12" fill="#2a303c">Brake pressure x4  (input)</text>
+<path d="M1315,104 L1315,300" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="1290.8" y="188" width="48.400000000000006" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="1315" y="201" text-anchor="middle" font-size="11.5" fill="#2a303c">BrkPrs</text>
+<rect x="200" y="510" width="260" height="100" rx="8" fill="#f5eefd" stroke="#7a4fd6" stroke-width="1.6"/>
+<text x="330.0" y="547.0" text-anchor="middle" font-size="14" font-weight="700" fill="#241640">f1_aero_active</text>
+<text x="330.0" y="565.0" text-anchor="middle" font-size="12" fill="#241640" font-family="Menlo, Consolas, monospace">corner / straight mode</text>
+<text x="330.0" y="583.0" text-anchor="middle" font-size="12" fill="#241640">CdA 1.095 / 0.85 m2</text>
+<rect x="640" y="510" width="800" height="100" rx="8" fill="#efe6fb" stroke="#7a4fd6" stroke-width="1.6"/>
+<text x="1040.0" y="547.0" text-anchor="middle" font-size="14" font-weight="700" fill="#241640">Vehicle Body  -  3-DOF dual track</text>
+<text x="1040.0" y="565.0" text-anchor="middle" font-size="12" fill="#241640">lateral: mapped slip-angle tables Cy(alpha), saturating</text>
+<text x="1040.0" y="583.0" text-anchor="middle" font-size="12" fill="#241640">aero: Cl 3.2, Cd 0.73, Af 1.5 m2 (+ FExt)    |    longitudinal: external forces Fx from the wheels</text>
+<path d="M640,540 L460,540" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="506.6" y="516" width="86.80000000000001" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="550" y="529" text-anchor="middle" font-size="11.5" fill="#2a303c">vx, yaw rate</text>
+<path d="M460,585 L640,585" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="532.2" y="561" width="35.6" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="550" y="574" text-anchor="middle" font-size="11.5" fill="#2a303c">FExt</text>
+<path d="M1250,390 L1250,510" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="1229.0" y="443" width="42.0" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="1250" y="456" text-anchor="middle" font-size="11.5" fill="#2a303c">Fz x4</text>
+<path d="M1380,510 L1380,390" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="1359.0" y="443" width="42.0" height="17" rx="3" fill="#ffffff" fill-opacity="0.92"/>
+<text x="1380" y="456" text-anchor="middle" font-size="11.5" fill="#2a303c">Fx x4</text>
+<rect x="700" y="662" width="170" height="26" rx="13.0" fill="#ffffff" stroke="#5b6577" stroke-width="1.3" stroke-dasharray="4 3"/>
+<text x="785.0" y="679.0" text-anchor="middle" font-size="12" fill="#2a303c">SteerAngle  (input)</text>
+<path d="M785,662 L785,610" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="1030" y="662" width="410" height="26" rx="13.0" fill="#ffffff" stroke="#5b6577" stroke-width="1.3" stroke-dasharray="4 3"/>
+<text x="1235.0" y="679.0" text-anchor="middle" font-size="12" fill="#2a303c">carX, carY, psi, xdot, FzF, FzR  (outputs)</text>
+<path d="M1235,610 L1235,662" fill="none" stroke="#4a5363" stroke-width="1.6" marker-end="url(#a)"/>
+</svg>

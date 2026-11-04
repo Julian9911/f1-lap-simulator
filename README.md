@@ -77,8 +77,7 @@ Full discussion in the [technical report](docs/technical_report.pdf).
 
 - **Vehicle model:** rigid body, no suspension, roll, pitch or ride height; lumped aerodynamics (no aero balance, no ground effect); lateral grip does not depend on tire load.
 - **Not modelled, on purpose:** the ERS (the model already has more average power than the real car, so a realistic ERS would most probably slow it down), wet track, tire compounds and wear.
-- **Parameters:** only mass and wheelbase come from the regulations. Tire peaks, CG height, weight distribution, LSD preload and the straight-mode drag are estimates or calibrations. See the [parameter register](docs/parameter_register.md).
-- **Open item (OI-1):** the Vehicle Body block uses a CG height of 0.275 m, while the friction-circle estimates in `f1_engine_cmd` and `f1_pedals_to_cmd` use 0.35 m. The effect is small; see the register for how to align them.
+- **Parameters:** only mass and wheelbase come from the regulations. Tire peaks, CG height (0.35 m, above the usual 0.25-0.30 m range), weight distribution, LSD preload and the straight-mode drag are estimates or calibrations. See the [parameter register](docs/parameter_register.md).
 - **Known defects:** gear hunting in slow corners (saw-tooth engine speed), torque spikes at shifts, two isolated wheel-slip peaks per lap, and an acceleration shortfall of 0.5–1 m/s² above 70 m/s whose cause is not identified.
 - **Reference data:** a qualifying lap; sector times of the real lap are estimates from aligned telemetry, not official timing.
 
@@ -125,7 +124,7 @@ The CSV files in `data/` were prepared with small Python scripts (download of th
 
 ## Roadmap
 
-1. A single parameter source: several values are repeated by hand between the model and the speed profile (see open item OI-2 in the register).
+1. A single parameter source: several values are repeated by hand between the model and the speed profile (see open item OI-1 in the register).
 2. ERS with a per-lap energy budget (starting point: `f1_ers.m`).
 3. Wet track and tire compounds, then wear (a single-factor grip scale is already read by the setup scripts, value 1.0).
 4. Load sensitivity of grip and aero balance.
