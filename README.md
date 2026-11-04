@@ -59,9 +59,9 @@ Comparison against the public telemetry of the real lap, aligned by position. Se
 Time lost by corner speed class (from the real speed): slow −1.0 s, medium +3.5 s, fast +4.3 s.
 
 
-![Sector map: simulator vs real lap](docs/img/sector_map.png)
+![Sector map: simulator vs real lap](docs/img/sectores.png)
 
-![Pace: speed, time delta, lateral and longitudinal G](docs/img/telemetry_pace.png)
+![Pace: speed, time delta, lateral and longitudinal G](docs/img/telemetria_ritmo.png)
 
 The driving (throttle, brake) and power train (gear, rpm, power) views are `docs/img/telemetry_driving.png` and `docs/img/telemetry_powertrain.png`.
 
