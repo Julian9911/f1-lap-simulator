@@ -17,7 +17,7 @@ Short records of the engineering decisions that shaped the model: what was decid
 **Context.** The 2026 car deploys at most 350 kW from the MGU-K and about 4 MJ per lap (about 11 s of full deployment in an 88 s lap); the ICE gives about 400 kW.
 **Decision.** Do not model the ERS.
 **Why.** The model already delivers about 700 kW continuously, which is more average power than the real car. A realistic, energy-limited ERS would most probably slow the lap down, so it would add complexity and worsen the headline number without improving fidelity. `f1_ers.m` is kept as a starting point, unconnected.
-**Consequence.** Declared limitation; the engine map stands for the electrified power train as a whole.
+**Consequence.** Declared limitation; the engine map stands for the electrified power train as a whole. Work on it is paused (v7) and it stays in the roadmap.
 
 ### D-04 Wet track, tire compound and wear not integrated (v6)
 **Context.** A wet-track switch was designed: a single `gripScale` factor (0.82, calibrated to Pirelli's crossover from slicks to intermediates at 110-112 % of the dry lap time).
@@ -58,6 +58,7 @@ Short records of the engineering decisions that shaped the model: what was decid
 **Decision.** Keep the calculated minimum-curvature line.
 **Why.** The project is built only from public data and computes its own geometry; using the real path would turn part of the validation into an input. It also uses information a real team has and this project does not.
 **Consequence.** Known, documented geometry mismatches. A diagnostic option exists (`silverstone_raceline_real.csv`, switch `raceFile` in `f1_load_raceline.m`); it was never run in the simulator.
+**Evidence (v7).** Re-checked with the speed profile alone on the calculated line and on a line rebuilt from the GPS channels: the lines differ little (mean 2.4 m after alignment), but the ideal lap time depends strongly on the line and its smoothing (83-126 s). The sensitivities to grip, downforce, mass, engine and drag are almost identical on both lines, so the choice of line does not change the use of the model as a sensitivity tool. The real telemetry also shows a position offset of about 100 m between the position and acceleration channels (cause not verified), which makes the real path a weaker input than it looks.
 
 ### D-11 Compare against the real lap by position, not by integrated distance (v2)
 **Context.** A first comparison by integrated distance was offset by 85-165 m.
@@ -67,6 +68,30 @@ Short records of the engineering decisions that shaped the model: what was decid
 ### D-12 Regression test with a baseline and tolerances (v2)
 **Decision.** After any change, run an automated PASS/FAIL script with a lap-time baseline and thresholds.
 **Consequence.** A broken model is detected in seconds. The baseline must be updated deliberately when the model is improved on purpose.
+
+## Architecture and workflow (v7)
+
+### D-14 One source of truth for the parameters (v7)
+**Context.** The same values (mass, CG height, ClA, CdA, gear ratios, torque scale, final drive, wheel radius, brake disc, tire peaks) were typed in `f1_vehicle_params`, in the block dialogs, inside the control functions and in the speed profile. Changing a value in one place and not in another changed the car without warning.
+**Decision.** `f1_vehicle_params.m` holds the structs `veh`, `aero`, `tire`, `pwr` and `brk`. The speed profile reads them directly; the block dialogs use workspace expressions (for example `pwr.Re`, `brk.Rm`); the four control MATLAB Function blocks read them through Parameter data (`fp_*` flat aliases defined in the same script).
+**Why aliases.** A Parameter of a MATLAB Function block reads a plain workspace variable, not a struct field.
+**Consequence.** The result did not change (regression 8/8, 94.93 s after every step). Two practical rules: run `f1_vehicle_params` before simulating, and after pasting new code into a MATLAB Function block re-create its Parameter data (`f1_fix_function_params.m`), because the editor discards them. `f1_scan_model_params.m` lists any value still typed by hand. Not shared on purpose: the engine and brake maps (block data) and the design parameters of the controller (`mu_min`, maximum throttle torque, `useFC`) and of the speed profile (`mu_v`, `a_brake`, `v_cap`, `win_k`).
+
+### D-15 Two layers; the grip level of the reference lap is set by hand (v7)
+**Context.** An external review asked what the tool is: a lap simulator or something else, and what drives the controller.
+**Decision.** Describe and keep two layers. Layer 1 (`f1_speed_profile.m`) is a quasi-steady-state point-mass lapsim: it computes the fastest speed profile the car can reach on the line from the engine, gearbox, aero, rolling resistance, traction and braking data. Layer 2 (Simulink) is the closed-loop vehicle and controllers that try to follow that profile. Layer 2 does not search for its own limit: the grip the profile demands (`mu_v`) is chosen by the user.
+**Why.** The goal is a model-in-the-loop test bench for the vehicle and its control. The scenario generator belongs outside the plant and the controller. An automatic search of the limit was designed (an outer loop that raises the demanded grip until the car stops tracking) and not adopted: a single global value is a crude limit, and automating more parameters (braking, then one value per corner) multiplies the simulation time (about 5 minutes each) without changing what the project is.
+**Consequence.** The lap time is set by the profile plus the tracking losses (ideal profile about 91.2 s, simulated 94.9 s). The driver is a profile follower, not a limit-seeking driver. Roadmap: global limit search, one limit per corner, then a driver with online grip estimation.
+
+### D-16 Lap-time sensitivity as the main use of the model (v7)
+**Context.** The absolute gap to the real lap (+6.84 s) depends on the line, the tire model and parameters that are estimates. Reviewers stressed that what matters is a consistent response of the lap time to changes.
+**Decision.** Add `f1_sensitivity_sweep.m`: it changes one group of base values by +5 % (through the hooks `sweepA`/`sweepB` of `f1_vehicle_params.m`), rebuilds the profile and the tables, simulates 260 s and reads the lap time.
+**Consequence.** Grip -1.76 s, engine torque -0.97 s, mass +0.96 s, downforce -0.77 s, drag (straight mode) +0.06 s. All signs are physically coherent, and the base case reproduces the regression value. The effect of drag is at the resolution limit of the model. About 5 minutes per simulation.
+
+### D-17 Internal-states view from the Vehicle Body (v7)
+**Decision.** Add one logging branch (`f1_add_internal_logging.m`) fed from the Info bus of the Vehicle Body: load and forces per wheel, CG accelerations and body slip. `f1_internal_states.m` plots them (load per wheel, utilization, lateral load transfer, body slip, g-g, speed).
+**Why.** The review asked for channels that cannot be measured on a real car (for example the loads at the tire contact patch) and a simplified view.
+**Consequence and caveats.** The signals are those the vehicle body sees, not outputs of the Combined Slip blocks: Fy comes from the mapped lateral table, Fx from the wheel blocks, Fz from the body load transfer. "Utilization" is an index defined in the script, not a model signal. The model has no suspension, so load transfer is instantaneous and the inner wheels unload almost completely in the tightest corners (about 1100 m and 2100 m); the 2084 m stretch coincides with the maximum lateral error of the regression, a correlation not yet investigated. Peak accelerations (about 4.5 g lateral, 4.2 g braking, 1.8 g traction) are plausible for the car but not compared with the real lap.
 
 ## Housekeeping
 

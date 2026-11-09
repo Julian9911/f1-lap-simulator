@@ -1,48 +1,54 @@
 %% f1_speed_profile.m
-% Perfil de velocidad de referencia para Silverstone (VelRef del piloto).
-% Correr DESPUES de f1_vehicle_params (necesita trackS, trackX, trackY,
-% curvature en el workspace). Produce: trackVref [m/s], mismo tamano que trackS.
+% Reference speed profile for Silverstone (VelRef of the pilot).
+% Run AFTER the reference line is loaded (it needs trackS, trackX, trackY
+% and curvature in the workspace; f1_vehicle_params does this for you).
+% Produces: trackVref [m/s], same size as trackS.
 %
-% Idea fisica:
-%  1) Limite en curva con carga aerodinamica. La aceleracion lateral
-%     maxima es   v^2*kappa = mu*(g + k*v^2),   k = 0.5*rho*ClA/m
-%     (la aero crece con v^2 y "pega" el auto al suelo). Despejando:
-%         v = sqrt( mu*g / (kappa - mu*k) )     si kappa > mu*k
-%     Si kappa <= mu*k la aero sostiene cualquier velocidad -> sin limite
-%     de curva (solo manda el tope v_cap).
-%  2) Pasada hacia atras (frenado): la velocidad en cada punto no puede
-%     exceder lo que se alcanza a frenar hasta el punto siguiente:
+% Author: Julian Orozco - https://github.com/Julian9911 - MIT License
+%
+% Physical idea:
+%  1) Corner limit with aerodynamic load. The maximum lateral acceleration
+%     is   v^2*kappa = mu*(g + k*v^2),   k = 0.5*rho*ClA/m
+%     (the aero grows with v^2 and "presses" the car on the ground). Solving:
+%         v = sqrt( mu*g / (kappa - mu*k) )     if kappa > mu*k
+%     If kappa <= mu*k the aero sustains any speed -> no corner limit
+%     (only the cap v_cap applies).
+%  2) Backward pass (braking): the speed at each point cannot exceed what
+%     can be braked down to the next point:
 %         v(i) <= sqrt( v(i+1)^2 + 2*a_brake*ds )
-%     Se recorre el circuito dos veces (circular) para cerrar la vuelta.
-%     Sin esto, VelRef caeria de golpe al llegar a la curva y el piloto
-%     no tendria distancia para frenar.
-%  (No se hace pasada hacia adelante: si VelRef sube mas rapido de lo que
-%   el auto acelera, el piloto simplemente va a acelerador completo.)
+%     The circuit is traversed twice (circular) to close the lap.
+%     Without this, VelRef would drop suddenly on arriving at the corner
+%     and the pilot would have no distance to brake.
+%  3) Forward pass (acceleration): the car cannot leave a corner at the
+%     speed of the next straight instantly; see section 3 below.
 
-%% Parametros (ajustables)
-rho     = 1.225;      % [kg/m^3] densidad del aire
-ClA     = 3.2 * 1.5;  % [m^2]    Cl*Af del Vehicle Body (= 4.8; fuentes: 3.2-6.4). v4: con FZMAX 15000 ya no hay bloqueos de rueda
-m       = 770;        % [kg]
+%% Parameters (adjustable)
+% Values SHARED with the model come from f1_vehicle_params.m (structs veh, aero, pwr,
+% tire): one single source, so there is no second place to edit. The variable names
+% are kept as before, so nothing else in the project changes.
+rho     = aero.rho;   % [kg/m^3] air density
+ClA     = aero.ClA;   % [m^2]    Cl*Af of the Vehicle Body (= 4.8; sources: 3.2-6.4). With FZMAX 15000 there are no wheel lockups
+m       = veh.m;      % [kg]
 g       = 9.81;       % [m/s^2]
-mu_v    = 1.7;        % v3 (con circulo de friccion): 1.7. Antes 1.5 (v1 validada: vuelta
-                      % 133.69 s, error 1.49 m). Con 1.7-1.8 el auto sigue
-                      % la pista pero aparecen disparos/bloqueos de rueda trasera
-v_cap   = 90;         % [m/s] tope en rectas (~ velocidad maxima del auto)
-a_brake = 20;         % [m/s^2] frenado del perfil = el que el auto logra en la sim (medido ~20; real ~22)
+mu_v    = tire.mu_pk_f;           % 1.7 with the friction circle. It was 1.5 in validated v1 (lap
+                      % 133.69 s, error 1.49 m). With 1.7-1.8 the car still
+                      % follows the track but rear wheel spikes/lockups appear
+v_cap   = 90;         % [m/s] cap on straights (~ top speed of the car)
+a_brake = 20;         % [m/s^2] braking of the profile = what the car achieves in the sim (measured ~20; real ~22)
 
-win_k   = 5;          % [puntos] ventana de suavizado de la curvatura (5 pts = 10 m; antes 15 = 30 m, inflaba curvas)
+win_k   = 5;          % [points] curvature smoothing window (5 pts = 10 m; 15 = 30 m used to inflate corners)
 
 ds = trackS(2) - trackS(1);   % 2 m
 N  = numel(trackS);
 
-%% 0) Suavizado de la curvatura (quita el ruido de OpenStreetMap)
-% El ruido de la curvatura hace que VelRef "tiemble" +-2-4 m/s en las
-% zonas de curvas encadenadas, y el PI del piloto lo persigue alternando
-% acelerador y freno. Primero un maximo movil (envolvente: conserva el
-% pico de cada curva y no lo suaviza hacia abajo) y despues un promedio.
+%% 0) Curvature smoothing (removes OpenStreetMap noise)
+% Curvature noise makes VelRef "shake" +-2-4 m/s in chained corners, and the
+% pilot controller chases it by alternating throttle and brake. First a
+% moving maximum (envelope: it keeps the peak of each corner and does not
+% smooth it downwards) and then a moving average.
 curvature_s = movmean(movmax(curvature(:), win_k), win_k);
 
-%% 1) Limite de curva con aero
+%% 1) Corner limit with aero
 k   = 0.5 * rho * ClA / m;
 den = curvature_s - mu_v * k;
 vcurve = v_cap * ones(N, 1);
@@ -50,48 +56,49 @@ ok = den > 1e-9;
 vcurve(ok) = sqrt(mu_v * g ./ den(ok));
 trackVref = min(vcurve, v_cap);
 
-%% 2) Pasada hacia atras (frenado), circular, dos vueltas
-vcurve0 = trackVref;      % limite de curva puro (para la pasada hacia adelante)
+%% 2) Backward pass (braking), circular, two laps
+vcurve0 = trackVref;      % pure corner limit (for the forward pass)
 for pass = 1:2
     for i = N:-1:1
-        j = mod(i, N) + 1;                       % siguiente punto (circular)
+        j = mod(i, N) + 1;                       % next point (circular)
         trackVref(i) = min(trackVref(i), sqrt(trackVref(j)^2 + 2*a_brake*ds));
     end
 end
 
-%% 3) Pasada hacia adelante (aceleracion), circular, dos vueltas
-% El auto no puede salir de una curva a la velocidad de la recta siguiente
-% al instante: su aceleracion maxima depende de la velocidad (motor - arrastre).
-% v5: la tabla ya no se mide: se CALCULA desde el mapa del motor, la caja de 8 marchas y
-% las resistencias, con los mismos parametros del modelo (reproducible). Validacion: con
-% el motor anterior (1 MW, una marcha de 1.35) este calculo reproduce la tabla medida de la
-% v4 con diferencias <= 0.4 m/s^2 entre 30 y 90 m/s.
-%   a(v) = [ min(F_motor, F_tracccion) - F_aero - F_rodadura ] / m
-eng_scale = 0.91;     % factor del torque del motor: 750 kW (reglamento 2026) a 12 000 rpm. DEBE coincidir con
-                      % el factor aplicado a f_tbrake en el Mapped SI Engine ("]*3.897*0.91")
-Re_w   = 0.3515;      % [m] radio efectivo de la rueda
-N_diff = 4;  eta_tr = 0.9;
-N_box  = [2.893 2.407 1.965 1.680 1.473 1.276 1.139];   % marchas 2..8 (= vector N de la transmision)
-rpm_up = 11000;       % la marcha es la mas baja con rpm <= rpm_up (igual que f1_shift_logic)
-rpm_bpt = [0 750 1053.57 1357.14 1660.71 1964.29 2267.86 2571.43 2875 3178.57 3482.14 3785.71 4089.29 4392.86 4696.43 5000] * 3.2;   % [rpm]
-T_full  = [77.7345 77.7345 102.2072 120.9147 132.0395 143.8904 150.1347 155.4065 155.4065 156.9623 161.5149 166.2934 171.8297 173.7861 174.6472 174.6472] * 3.897;  % [N*m] fila de torque maximo del mapa
-CdA    = 0.85;        % [m^2] modo recta (aero activa). Debe coincidir con CdA_recta de f1_aero_active.m (calibracion)
-Q1 = 0.00699077564863536;  Q3 = 0.00153535478298811;  Q7 = 0.89443879773793;  Fz0 = 4300;
-                      % rodadura: coeficientes QSY1, QSY3, QSY7 de la rueda. El termino QSY4 (v^4) no se
-                      % incluye: con el la tabla calculada no reproduce la aceleracion medida
-mu_trac = 1.4;  fr_rear = 0.55;   % agarre del limitador y reparto de masa trasero (traccion trasera)
+%% 3) Forward pass (acceleration), circular, two laps
+% The car cannot leave a corner at the speed of the next straight
+% instantly: its maximum acceleration depends on speed (engine - drag).
+% The table is not measured: it is COMPUTED from the engine map, the 8-speed
+% gearbox and the resistances, with the same parameters as the model
+% (reproducible). Validation: with the earlier engine (1 MW, a single gear
+% of 1.35) this calculation reproduces the measured table of v4 with
+% differences <= 0.4 m/s^2 between 30 and 90 m/s.
+%   a(v) = [ min(F_engine, F_traction) - F_aero - F_rolling ] / m
+eng_scale = pwr.eng_scale;% engine torque factor: 750 kW (2026 regulation) at 12 000 rpm. MUST match
+                      % the factor applied to f_tbrake in the Mapped SI Engine ("]*3.897*0.91")
+Re_w   = pwr.Re;      % [m] effective wheel radius
+N_diff = pwr.N_diff;  eta_tr = pwr.eta_tr;
+N_box  = pwr.gears;  % gears 2..8 (= N vector of the transmission)
+rpm_up = pwr.rpm_up;  % the gear is the lowest one with rpm <= rpm_up (same as f1_shift_logic)
+rpm_bpt = pwr.rpm_bpt;   % [rpm]
+T_full  = pwr.T_full;  % [N*m] maximum torque row of the map
+CdA    = aero.CdA_straight;   % [m^2] straight mode (active aero). Must match CdA_straight in f1_aero_active.m (calibration)
+Q1 = tire.QSY1;  Q3 = tire.QSY3;  Q7 = tire.QSY7;  Fz0 = tire.Fz0_roll;
+                      % rolling resistance: coefficients QSY1, QSY3, QSY7 of the wheel. The QSY4 (v^4) term is
+                      % not included: with it the computed table does not reproduce the measured acceleration
+mu_trac = tire.mu_trac;  fr_rear = veh.weight_dist_r;   % limiter grip and rear mass fraction (rear-wheel drive)
 v_tab = 0:2:100;
 a_tab = zeros(size(v_tab));
 for ii = 1:numel(v_tab)
     vv  = v_tab(ii);
-    Lz  = m*g + 0.5*rho*ClA*vv^2;                          % carga vertical total
+    Lz  = m*g + 0.5*rho*ClA*vv^2;                          % total vertical load
     Nsel = N_box(end);
     for kk = 1:numel(N_box)
         if vv / Re_w * N_box(kk) * N_diff * 30/pi <= rpm_up, Nsel = N_box(kk); break, end
     end
     rpm = vv / Re_w * Nsel * N_diff * 30/pi;
     Tq  = interp1(rpm_bpt, T_full, min(rpm, rpm_bpt(end))) * eng_scale;
-    Tq  = Tq * min(1, max(0, (15000 - rpm) / 1000));       % limitador de rpm (14000-15000)
+    Tq  = Tq * min(1, max(0, (pwr.rpm_lim_end - rpm) / pwr.rpm_lim_taper));   % rev limiter (14000-15000)
     Fm  = Tq * Nsel * N_diff * eta_tr / Re_w;
     Ft  = mu_trac * fr_rear * Lz;
     Fa  = 0.5 * rho * CdA * vv^2;
@@ -106,13 +113,13 @@ for pass = 1:2
         vf(j) = min(vf(j), sqrt(vf(i)^2 + 2*a_acc*ds));
     end
 end
-% El perfil final cumple ambos limites: frenado (atras) y aceleracion (adelante)
+% The final profile meets both limits: braking (backward) and acceleration (forward)
 trackVref = min(trackVref, vf);
 
-%% Verificacion
-fprintf('Vuelta ideal del perfil (alcanzable): %.2f s\n', sum(ds ./ trackVref));
-fprintf('Perfil de velocidad: min %.1f m/s (%.0f km/h) en s = %.0f m | max %.1f m/s\n', ...
+%% Check
+fprintf('Ideal lap of the profile (reachable): %.2f s\n', sum(ds ./ trackVref));
+fprintf('Speed profile: min %.1f m/s (%.0f km/h) at s = %.0f m | max %.1f m/s\n', ...
     min(trackVref), min(trackVref)*3.6, trackS(find(trackVref == min(trackVref), 1)), max(trackVref));
 
-figure; plot(trackS, trackVref*3.6); grid on
-xlabel('Distancia s [m]'); ylabel('VelRef [km/h]'); title('Perfil de velocidad de referencia');
+figure('Name', 'Reference speed profile'); plot(trackS, trackVref*3.6); grid on
+xlabel('Distance s [m]'); ylabel('VelRef [km/h]'); title('Reference speed profile');

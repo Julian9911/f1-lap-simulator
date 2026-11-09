@@ -1,27 +1,30 @@
 %% f1_load_raceline.m
-% Reemplaza la referencia del piloto (centerline) por la LINEA DE CARRERA
-% generada con f1_make_raceline.py (silverstone_raceline.csv).
+% Replaces the pilot reference (centerline) with the RACING LINE generated
+% by f1_make_raceline.py (silverstone_raceline.csv).
 %
-% Correr DESPUES de f1_track_curvature.m (el maestro f1_vehicle_params.m ya lo
-% hace si useRaceline = true). Sobrescribe en el workspace:
-%   trackX, trackY   - linea de carrera, cada 2 m, circuito cerrado
-%   trackS           - distancia acumulada [m]
-%   curvature        - curvatura de la linea de carrera [1/m] (sin signo)
-%   trackPsi         - rumbo de la linea [rad] = atan2(dy, dx), calculado
-%                      con extension periodica (sin salto en la meta)
-%   totalLength      - longitud de la linea de carrera [m]
+% Author: Julian Orozco - https://github.com/Julian9911 - MIT License
 %
-% El modelo de Simulink NO cambia: el piloto sigue trackX/trackY/trackPsi y
-% el perfil de velocidad (f1_speed_profile.m) se recalcula con la nueva
-% curvatura. Para volver a la v1 (centerline): useRaceline = false en el maestro.
+% Run AFTER f1_track_curvature.m (the master f1_vehicle_params.m already
+% does it if useRaceline = true). It overwrites in the workspace:
+%   trackX, trackY   - racing line, every 2 m, closed circuit
+%   trackS           - accumulated distance [m]
+%   curvature        - curvature of the racing line [1/m] (unsigned)
+%   trackPsi         - heading of the line [rad] = atan2(dy, dx), computed
+%                      with periodic extension (no jump at the finish line)
+%   totalLength      - length of the racing line [m]
+%
+% The Simulink model does NOT change: the pilot follows trackX/trackY/trackPsi
+% and the speed profile (f1_speed_profile.m) is recomputed with the new
+% curvature. To go back to v1 (centerline): useRaceline = false in the master.
 
 rl = readmatrix('silverstone_raceline.csv');
 x0 = rl(:,1);  y0 = rl(:,2);
 n0 = numel(x0);
-ds = 2;                         % [m] mismo espaciado que f1_track_curvature
-pad = 40;                       % [puntos] extension periodica
 
-% Extension periodica para derivar sin efectos de borde en la meta
+ds = 2;                         % [m] same spacing as f1_track_curvature
+pad = 40;                       % [points] periodic extension
+
+% Periodic extension to differentiate without edge effects at the finish line
 xe = [x0(end-pad+1:end); x0; x0(1:pad)];
 ye = [y0(end-pad+1:end); y0; y0(1:pad)];
 dx  = gradient(xe, ds);   dy  = gradient(ye, ds);
@@ -37,12 +40,12 @@ curvature = kappa(idx);
 trackPsi  = psi(idx);
 totalLength = n0 * ds;
 
-% Velocidad limite TEORICA por curvatura (misma formula que f1_track_curvature.m).
-% La usa el bloque heredado f1_speed_target (Pilot/MATLAB Function2) y debe
-% tener el MISMO numero de puntos que trackS, o da "Index exceeds array
-% dimensions" (el centerline tenia 2929 puntos y la linea de carrera 2894).
-a_lat_max = 1.5 * 9.81;                                   % [m/s^2] igual que en f1_track_curvature.m
+% THEORETICAL speed limit from curvature (same formula as f1_track_curvature.m).
+% It is used by the legacy block f1_speed_target (Pilot/MATLAB Function2) and must
+% have the SAME number of points as trackS, or it gives "Index exceeds array
+% dimensions" (the centerline had 2929 points and the racing line 2894).
+a_lat_max = 1.5 * 9.81;                                   % [m/s^2] same as in f1_track_curvature.m
 v_max_kmh = min(sqrt(a_lat_max ./ max(curvature, 1e-6)) * 3.6, 380);
 
-fprintf('Linea de carrera: %d puntos, %.0f m | curvatura p95 %.4f 1/m | salto de rumbo en la meta %.2f grados\n', ...
+fprintf('Racing line: %d points, %.0f m | curvature p95 %.4f 1/m | heading jump at the finish line %.2f deg\n', ...
     n0, totalLength, prctile(curvature, 95), rad2deg(abs(atan2(sin(trackPsi(1)-trackPsi(end)), cos(trackPsi(1)-trackPsi(end))))));

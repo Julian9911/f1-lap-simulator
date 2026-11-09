@@ -9,7 +9,8 @@ Lap time is the second (flying) lap. Reference: real qualifying lap, 88.09 s.
 | v3 | 2026-10-30 | 102.96 s | +14.9 s | Friction circle in the torque and brake limiters; speed-profile grip 1.5 to 1.7. |
 | v4 | 2026-10-31 | 94.71 s | +6.6 s | Aerodynamics ClA 4.8 m2; wheel FZMAX 15 000 N; limited slip differential; air temperature 288.15 K. |
 | v5 | 2026-11-01 | 95.28 s | +7.2 s | Engine map scaled to about 750 kW; 8-speed gearbox with shift logic; acceleration table calculated from the model instead of measured. |
-| v6 | 2026-11-01 | **94.91 s** | **+6.8 s** | Active aero straight mode (CdA 0.85 m2) through the external force port; top speed 302 to 316 km/h. |
+| v6 | 2026-11-01 | 94.91 s | +6.8 s | Active aero straight mode (CdA 0.85 m2) through the external force port; top speed 302 to 316 km/h. |
+| v7 | 2026-11-08 | **94.93 s** | **+6.84 s** | No change in behavior. One source of parameters (`f1_vehicle_params`) read by the speed profile, the block dialogs and the control functions; lap-time sensitivity sweep of the full model; internal-states view (per-wheel load and forces, utilization, load transfer, body slip). |
 
 ## Post-v6 (no change to results)
 
