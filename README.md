@@ -29,17 +29,19 @@ Use it to **evaluate what a car and its control need to follow a target profile*
 
 ## Results (v7)
 
-| Metric | Value |
-|---|---|
-| Simulated lap (second, flying lap) | **94.93 s** |
-| Ideal lap of the speed profile (layer 1) | 91.21 s |
-| Real reference (qualifying, 2026 British GP) | 88.09 s |
-| Gap to the real lap | +6.84 s (+7.8 %) |
-| Top speed, simulated / real | 316 / 317 km/h |
-| Lateral error to the reference line, max / 95th percentile | 2.01 m / 1.54 m |
-| Automated regression test | 8/8 pass (baseline 94.9 ± 1.5 s) |
+What matters here is how well the model behaves as a test bench, not the lap time it reaches.
 
-Progress by version: 126.58 s → 109.29 s → 102.96 s → 94.71 s → 95.28 s → 94.91 s → **94.93 s** (see [CHANGELOG](docs/CHANGELOG.md)). v7 does not change the behavior of the model; it makes it maintainable and adds the analysis below.
+| Aspect | Result |
+|---|---|
+| Line tracking, lateral error max / 95th percentile | 2.01 m / 1.54 m (line half-width 4 m) |
+| Automated regression test | 8/8 pass after every change |
+| Parameters with declared source or status | 45 of 45 ([register](docs/parameter_register.md)) |
+| Single source of parameters | yes (`f1_vehicle_params.m`), checked by the regression after each step |
+| Sensitivity of the lap to the main parameters | quantified, signs coherent (table below) |
+| Internal states not measurable on a real car | available (section below) |
+| Top speed with active aero, simulated / real | 316 / 317 km/h |
+
+The lap time is an output of the model, not its goal: about 94.9 s in closed loop, 91.2 s for the ideal speed profile of layer 1, and 88.09 s for the real qualifying lap used as a reference (+6.84 s, +7.8 %). The gap depends mostly on estimated parameters and on the calculated race line, so it is a context figure and not a quality measure. Version history is in the [CHANGELOG](docs/CHANGELOG.md); v7 does not change the behavior of the model, it makes it maintainable and adds the analysis below.
 
 ## Lap-time sensitivity
 
