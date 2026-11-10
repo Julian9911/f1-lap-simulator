@@ -93,6 +93,12 @@ Short records of the engineering decisions that shaped the model: what was decid
 **Why.** The review asked for channels that cannot be measured on a real car (for example the loads at the tire contact patch) and a simplified view.
 **Consequence and caveats.** The signals are those the vehicle body sees, not outputs of the Combined Slip blocks: Fy comes from the mapped lateral table, Fx from the wheel blocks, Fz from the body load transfer. "Utilization" is an index defined in the script, not a model signal. The model has no suspension, so load transfer is instantaneous and the inner wheels unload almost completely in the tightest corners (about 1100 m and 2100 m); the 2084 m stretch coincides with the maximum lateral error of the regression, a correlation not yet investigated. Peak accelerations (about 4.5 g lateral, 4.2 g braking, 1.8 g traction) are plausible for the car but not compared with the real lap.
 
+### D-18 Interactive corner map as an analysis view (v7)
+**Context.** A review pointed out that the lap time is not what gives the project its value, and asked for a way to see what the model does corner by corner.
+**Decision.** Add `f1_corner_map.m`, a MATLAB view (uifigure) that draws the trajectory of the simulator on the circuit, colored by driver action, detects the corners as deep speed minima (the lap is treated as circular) and shows for each one its numbers and three plots (speed, pedals, accelerations) against the real reference lap, with a slider that moves a point along the lap. It only reads `out`; it does not modify the model.
+**Why MATLAB and not a web page.** Whoever opens the project already needs MATLAB, and the view uses the real simulation data. A static export (`docs/img/corner_map.png`) covers the README; a web version would only add reach for people without MATLAB (possible later with GitHub Pages).
+**Consequence and caveats.** Track edges are drawn at a fixed half width (illustrative). The real lap is placed by `S_aligned`, so corners near the finish line can be compared with a position offset. Real accelerations are not shown because their nature (measured or derived) is unconfirmed.
+
 ## Housekeeping
 
 ### D-13 Retired prototypes (v6 clean-up)

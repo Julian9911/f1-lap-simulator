@@ -41,6 +41,7 @@ These are project-level targets for the documentation. They are verified by anal
 | R-13 | Every physical parameter shall be defined in one place only. | Inspection + Test | `f1_vehicle_params.m` (structs `veh`, `aero`, `tire`, `pwr`, `brk`); regression 8/8 unchanged after the refactor (D-14) | Met |
 | R-14 | The influence of the main parameters on lap time shall be quantified. | Analysis | `f1_sensitivity_sweep` (+5 % on mu, ClA, mass, engine, CdA); README table (D-16) | Met (CdA effect below the resolution of the model) |
 | R-15 | Quantities that cannot be measured on a real car shall be separated from those that can. | Inspection | `f1_internal_states` (per-wheel Fz, Fx, Fy, utilization, g-g) and README section "Internal states" (D-17) | Met (signals come from the Vehicle Body Info bus, not Combined Slip outputs) |
+| R-16 | The behavior of the model shall be inspectable corner by corner. | Demonstration | `f1_corner_map` (corner detection, per-corner numbers and plots against the real lap; D-18) | Met (corners are numbered, not named; track width is illustrative) |
 
 ## Traceability: requirement to regression criterion
 

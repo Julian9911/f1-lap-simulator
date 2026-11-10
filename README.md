@@ -66,6 +66,14 @@ All signs are physically coherent and the order of importance is grip, then engi
 
 What it shows in the current model: peak accelerations of about 4.5 g lateral, 4.2 g braking and 1.8 g traction; the inner wheels unload almost completely in the tightest corners; and the passage from braking to cornering is more abrupt than a real driver's trail braking. Caveats: the signals are what the vehicle body sees (the lateral force comes from the mapped table, the longitudinal force from the wheel blocks, the vertical load from the body), "utilization" is an index defined in the script, and the model has no suspension, so load transfer is instantaneous. Details in the [decision log](docs/decision_log.md) (D-17).
 
+## Corner map (interactive)
+
+`f1_corner_map.m` draws the circuit seen from above, with the line the model drove colored by what the driver does (braking, throttle, lift and coast). Each corner has a numbered marker: click it, or pick it in the drop-down, to zoom in. A card over the map gives the numbers of the corner, and the right-hand panel plots speed, throttle and brake, and accelerations around it, simulator against the real reference lap. A slider moves a point along the circuit and a cursor follows it in the three plots. Zoom with the mouse wheel and pan by dragging; legend items hide or show a signal; the card can be moved and minimized.
+
+![Corner map](docs/img/corner_map.png)
+
+The track width drawn is illustrative (OpenStreetMap has none), and corners are numbered in order of detection (deep speed minima), not with the official names. The real lap is compared by position along the lap.
+
 ## How it works
 
 | Subsystem | What it does |
@@ -84,7 +92,7 @@ Requirements: MATLAB R2026a, Simulink and Vehicle Dynamics Blockset. The telemet
 1. **Open the project** `F1.prj` (not the `.slx` alone: the project puts the folders on the path).
 2. **Initialize:** run `f1_vehicle_params`. It loads the vehicle, the circuit, the race line, the speed profile and the finish line.
 3. **Simulate** `F1_Simulator` (260 s). The lap animation starts when the run ends.
-4. **Analyze:** run `f1_regression_test` (PASS/FAIL per criterion), `f1_telemetry`, `f1_sector_map`, `f1_internal_states` or `f1_sensitivity_sweep`, or use the *Analysis tools* buttons in the model.
+4. **Analyze:** run `f1_regression_test` (PASS/FAIL per criterion), `f1_telemetry`, `f1_sector_map`, `f1_internal_states`, `f1_corner_map` or `f1_sensitivity_sweep`, or use the *Analysis tools* buttons in the model.
 
 ### Changing a parameter
 
@@ -144,7 +152,7 @@ setup/                        Initialization: f1_vehicle_params, f1_lateral_tire
                               f1_track_curvature, f1_load_raceline, f1_speed_profile,
                               f1_finish_line_params
 analysis/                     f1_regression_test, f1_sensitivity_sweep, f1_internal_states,
-                              f1_telemetry, f1_sector_map, f1_track_animation,
+                              f1_corner_map, f1_telemetry, f1_sector_map, f1_track_animation,
                               f1_record_animation, f1_export_figures, f1_xy_plot
 tools/                        f1_add_internal_logging, f1_scan_model_params,
                               f1_fix_function_params
