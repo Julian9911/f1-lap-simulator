@@ -18,7 +18,7 @@ It is **not** a pure lap-time simulator, and it is not a fully dynamic one that 
  engine, gearbox, aero, rolling resistance,   speed      + wheels, differential, active aero
  traction and braking  ------------------->  profile ---> follows the profile and the race line
  => fastest speed the car can reach          (target)     => lap time, tracking error, internal states
-    on the line (ideal lap about 91.2 s)                     (simulated lap 94.9 s)
+    on the line (ideal lap about 85.6 s)                     (simulated lap 89.85 s)
 ```
 
 - **Layer 1** answers "how fast could this car go on this line?" with a point-mass model.
@@ -27,13 +27,13 @@ It is **not** a pure lap-time simulator, and it is not a fully dynamic one that 
 
 Use it to **evaluate what a car and its control need to follow a target profile**, and to see signals that a real car does not give you.
 
-## Results (v7)
+## Results (v8)
 
 What matters here is how well the model behaves as a test bench, not the lap time it reaches.
 
 | Aspect | Result |
 |---|---|
-| Line tracking, lateral error max / 95th percentile | 2.01 m / 1.54 m (line half-width 4 m) |
+| Line tracking, lateral error max / 95th percentile | 1.98 m / 1.67 m (line half-width 4 m) |
 | Automated regression test | 8/8 pass after every change |
 | Parameters with declared source or status | 45 of 45 ([register](docs/parameter_register.md)) |
 | Single source of parameters | yes (`f1_vehicle_params.m`), checked by the regression after each step |
@@ -41,7 +41,7 @@ What matters here is how well the model behaves as a test bench, not the lap tim
 | Internal states not measurable on a real car | available (section below) |
 | Top speed with active aero, simulated / real | 316 / 317 km/h |
 
-The lap time is an output of the model, not its goal: about 94.9 s in closed loop, 91.2 s for the ideal speed profile of layer 1, and 88.09 s for the real qualifying lap used as a reference (+6.84 s, +7.8 %). The gap depends mostly on estimated parameters and on the calculated race line, so it is a context figure and not a quality measure. Version history is in the [CHANGELOG](docs/CHANGELOG.md); v7 does not change the behavior of the model, it makes it maintainable and adds the analysis below.
+The lap time is an output of the model, not its goal: about 89.85 s in closed loop, 85.6 s for the ideal speed profile of layer 1, and 88.09 s for the real qualifying lap used as a reference (+1.76 s, +2.0 %). It must not be read as a validation: the grip level of the profile is set by hand, there is no tire wear or temperature, and many parameters are estimates, so the figure is context and not a quality measure. Version history is in the [CHANGELOG](docs/CHANGELOG.md). v8 changes only the race line (see [below](#why-a-calculated-race-line-and-not-the-real-gps-path)): the vehicle, its parameters and the controllers are the same as in v7.
 
 ## Lap-time sensitivity
 
@@ -55,6 +55,8 @@ Each row changes one group of parameters by +5 %, rebuilds the speed profile, si
 | Mass (+38.5 kg) | 95.89 s | +0.96 s | +1.24 s |
 | Downforce (ClA) | 94.16 s | −0.77 s | −0.90 s |
 | Drag, straight mode (CdA) | 94.99 s | +0.06 s | +0.21 s |
+
+*The table was measured with the v7 race line (lap 94.93 s) and has not been repeated with the v8 line; the signs and the order are expected to hold, the absolute values may shift.*
 
 All signs are physically coherent and the order of importance is grip, then engine, mass and downforce, then drag. The mass sensitivity (about 0.025 s/kg) is of the order usually quoted for F1; this is only an order-of-magnitude check, not a validation. The effect of drag is at the resolution limit of the model. The closed loop reacts more than the ideal profile to engine torque because more torque also reduces the tracking losses on corner exits.
 
@@ -79,7 +81,7 @@ The track width drawn is illustrative (OpenStreetMap has none), and corners are 
 | Subsystem | What it does |
 |---|---|
 | **Speed profile (layer 1)** | Point-mass quasi-steady-state lapsim on the race line: corner limit from the demanded grip and the aerodynamic load, a backward pass for braking and a forward pass limited by engine, 8-speed gearbox, drag, rolling resistance and traction. |
-| **Controller (Pilot)** | A Predictive Driver (Stanley steering) follows a minimum-curvature race line at the profile speed. Pedal commands become engine torque and brake pressure, limited by the grip the tires have left (friction circle). |
+| **Controller (Pilot)** | A Predictive Driver (Stanley steering) follows the race line (curvature-peak weighted, see below) at the profile speed. Pedal commands become engine torque and brake pressure, limited by the grip the tires have left (friction circle). |
 | **Plant (Vehicle Dynamics)** | Vehicle Body 3-DOF dual track with saturating lateral tire tables, Magic Formula wheels with disc brakes, a mapped engine at about 750 kW, an 8-speed gearbox with shift logic, a limited-slip differential and active aerodynamics (corner and straight modes). |
 | **Instrumentation** | Lap timer that detects finish-line crossings; logging of the internal states. |
 
@@ -104,7 +106,7 @@ Maintenance note: if you paste new code into one of the control MATLAB Function 
 
 ## Validation snapshot
 
-Comparison against the public telemetry of the real lap, aligned by position. Sector limits are approximate (taken from an image of the sectors). The sector times come from the v6 run (94.91 s); v7 differs by 0.02 s.
+Comparison against the public telemetry of the real lap, aligned by position. Sector limits are approximate (taken from an image of the sectors). The sector times, the corner-class losses and the findings below come from the v6/v7 runs with the previous race line (lap 94.9 s) and have not been regenerated for v8.
 
 | Sector | Sim | Real | Difference |
 |---|---|---|---|
@@ -121,12 +123,12 @@ What was found:
 
 ### Why a calculated race line and not the real GPS path
 
-The line is a minimum-curvature line computed from the circuit geometry, not how each driver takes each corner. It was kept on purpose, and checked: the calculated and the GPS-based lines differ little (mean 2.4 m after alignment); the absolute ideal lap time depends strongly on the line and its smoothing, but the sensitivities above are almost identical on both. So the line affects the absolute lap time far more than it affects how the lap time responds to changes. See D-10 in the [decision log](docs/decision_log.md).
+The line is calculated from the circuit geometry, not how each driver takes each corner. Until v7 it was a minimum-curvature line. In v8 the objective weights the curvature peaks more (it minimises the sum of curvature cubed instead of squared, within the same 4 m half-width), which is a simple approximation to a minimum-time line: it opens the slowest corner (profile minimum speed 64 to 72 km/h) and lowers the ideal lap of layer 1 from 91.2 s to 85.6 s and the closed-loop lap from 94.93 s to 89.85 s, with the same lateral error (max 1.98 m, p95 1.67 m). It does not use the vehicle model, and it was not compared with an optimal-control tool or with the real path; in position it is not closer to the GPS line than the previous one, and it stays inside a 4 m half-width while the real car uses more of the track. The line is stored as `silverstone_raceline.csv` (see D-19). The calculated line was kept over the real path on purpose, and checked: the calculated and the GPS-based lines differ little (mean 2.4 m after alignment); the absolute ideal lap time depends strongly on the line and its smoothing, but the sensitivities above are almost identical on both. So the line affects the absolute lap time far more than it affects how the lap time responds to changes. See D-10 in the [decision log](docs/decision_log.md).
 
 ## Declared limitations
 
 - **The driver follows a profile.** It does not search for the limit of the car: the grip level of the reference lap is set by the user, and the closed loop only reports how well the car follows it.
-- **Absolute lap time:** +6.84 s against the real lap. It depends on the race line, the tire model and parameters that are estimates; the project values the consistent response to changes more than the absolute number.
+- **Absolute lap time:** +1.76 s against the real lap. It depends on the race line, the grip level set by hand and parameters that are estimates, and the model has no tire wear or temperature; the project values the consistent response to changes more than the absolute number, and the small gap is not a validation.
 - **Vehicle model:** rigid body, no suspension, roll, pitch or ride height; lumped aerodynamics (no aero balance, no ground effect). Lateral grip does not depend on tire load, and the tire model is a table plus Magic Formula wheels, because no real tire data is available.
 - **Not modelled, on purpose:** the ERS (paused; the model already has more average power than the real car, so a realistic ERS would most probably slow it down), wet track, tire compounds and wear.
 - **Parameters:** only mass and wheelbase come from the regulations. Tire peaks, CG height, weight distribution, LSD preload and the straight-mode drag are estimates or calibrations. See the [parameter register](docs/parameter_register.md).
@@ -142,7 +144,7 @@ The line is a minimum-curvature line computed from the circuit geometry, not how
 | [Parameter register](docs/parameter_register.md) · [CSV](docs/parameter_register.csv) | Every parameter with value, unit, where it is used and how trustworthy it is. |
 | [Requirements and traceability](docs/requirements_traceability.md) | Requirements, verification method, link to the regression criteria. |
 | [Decision log](docs/decision_log.md) | Why the model is the way it is. |
-| [Changelog](docs/CHANGELOG.md) | Versions v1–v7 with lap times. |
+| [Changelog](docs/CHANGELOG.md) | Versions v1–v8 with lap times. |
 
 ## Repository layout
 

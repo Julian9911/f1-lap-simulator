@@ -34,7 +34,7 @@ P-08,Powertrain,Transmission dynamics,"Jout 0.1 kg m2, bout 0.0025, tau_s 0.01 s
 D-01,Driver,Stanley look-ahead / position gain,40 m / 2.5,,BLOCK,Predictive Driver block,Configuration frozen in v1.
 D-02,Driver,Reference-point search window,+/- 50 points (100 m),,DESIGN,f1_ref_pose,Avoids locking onto another part of the circuit that passes nearby.
 K-01,Track,Circuit centerline,"OpenStreetMap, about 5857 m, resampled every 2 m",,SOURCED,f1_track_curvature,"OpenStreetMap contributors, ODbL."
-K-02,Track,Reference (race) line,"minimum curvature, +/- 4 m half-width, about 5788 m",,ESTIMATED,f1_make_raceline.py; f1_load_raceline,"OSM has no track width; 4 m is a reasonable, conservative value."
+K-02,Track,Reference (race) line,"curvature-peak-weighted (p = 3), +/- 4 m half-width, about 5804 m",,ESTIMATED,silverstone_raceline.csv (precomputed); f1_load_raceline,"OSM has no track width; 4 m is a reasonable, conservative value."
 K-03,Track,Curvature smoothing for the speed profile,"moving max then moving mean, 5 points (10 m)",,DESIGN,f1_speed_profile,Removes OSM noise while keeping each corner's peak.
 S-01,Speed profile,Cornering grip used by the profile (the manual grip level),1.7,-,ESTIMATED,f1_speed_profile (mu_v = tire.mu_pk_f),"Equals the front tire peak; set by hand, the driver does not search for its own limit (D-15). Most influential parameter in the sweep (D-16). Limit speed: v = sqrt(mu g / (kappa - mu k)), k = 0.5 rho ClA / m."
 S-02,Speed profile,Braking deceleration,20,m/s2,CALIBRATED,f1_speed_profile (a_brake),Set to what the simulated car achieves (measured about 20 m/s2); the real car brakes at about 22 m/s2.

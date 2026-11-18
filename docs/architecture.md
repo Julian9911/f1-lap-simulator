@@ -2,7 +2,7 @@
 
 The model is a closed loop: a **Controller** (the pilot) commands a **Plant** (the car), and an **Instrumentation** block counts laps. Colors in the diagrams follow the icons of the Simulink blocks.
 
-The project has **two layers**. Layer 1 is an offline quasi-steady-state point-mass lap-time simulation (`f1_speed_profile`) that proposes a speed profile (about 91.2 s, the ideal lap). Layer 2 is this closed-loop Simulink vehicle, which follows that profile (94.93 s). The 3.7 s difference is the tracking gap. The model is a MIL (model-in-the-loop) test bench: the driver is a profile follower, and the grip level it is asked to use (`mu_v`) is set by hand (D-15).
+The project has **two layers**. Layer 1 is an offline quasi-steady-state point-mass lap-time simulation (`f1_speed_profile`) that proposes a speed profile (about 85.6 s, the ideal lap). Layer 2 is this closed-loop Simulink vehicle, which follows that profile (89.85 s). The 4.3 s difference is the tracking gap. The model is a MIL (model-in-the-loop) test bench: the driver is a profile follower, and the grip level it is asked to use (`mu_v`) is set by hand (D-15).
 
 ## 1. Top level
 
@@ -62,7 +62,7 @@ Screenshots of the model as built. The top level has four areas: *Analysis tools
 
 ![Workflow](img/workflow_sequence.png)
 
-The entry point `f1_vehicle_params` loads everything the model needs, in this order: lateral tire table, circuit curvature, race line, speed profile, finish line. Then the model is simulated for 260 s and the analysis tools read the resulting `out` variable.
+The entry point `f1_vehicle_params` loads everything the model needs, in this order: lateral tire table, circuit curvature, race line (a precomputed CSV, `silverstone_raceline.csv`), speed profile, finish line. Then the model is simulated for 260 s and the analysis tools read the resulting `out` variable.
 
 ## 5. Speed profile (offline reference, layer 1)
 

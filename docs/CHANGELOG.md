@@ -11,6 +11,7 @@ Lap time is the second (flying) lap. Reference: real qualifying lap, 88.09 s.
 | v5 | 2026-11-01 | 95.28 s | +7.2 s | Engine map scaled to about 750 kW; 8-speed gearbox with shift logic; acceleration table calculated from the model instead of measured. |
 | v6 | 2026-11-01 | 94.91 s | +6.8 s | Active aero straight mode (CdA 0.85 m2) through the external force port; top speed 302 to 316 km/h. |
 | v7 | 2026-11-08 | **94.93 s** | **+6.84 s** | No change in behavior. One source of parameters (`f1_vehicle_params`) read by the speed profile, the block dialogs and the control functions; lap-time sensitivity sweep of the full model; internal-states view (per-wheel load and forces, utilization, load transfer, body slip).; interactive corner map (`f1_corner_map`). |
+| v8 | 2026-11-17 | **89.85 s** | **+1.76 s** | Race line recomputed with curvature-peak weighting (sum of curvature cubed, same 4 m half-width) instead of minimum curvature. No change to the vehicle, parameters or controllers. Regression baseline moved from 94.7 s to 89.85 s on purpose; 8/8 pass (D-19). |
 
 ## Post-v6 (no change to results)
 
@@ -22,4 +23,5 @@ Lap time is the second (flying) lap. Reference: real qualifying lap, 88.09 s.
 Notes
 - v3 was 102.45 s with the friction-circle functions using h = 0.275 m and 102.96 s with 0.35 m. 0.35 m is the value used by the Vehicle Body block and by all the results, so 102.96 s is the consistent one. The parameter script had 0.275 m, which did not affect the results; it was set to 0.35 m for consistency.
 - The final run of the repository gave 94.93 s (+6.84 s, +7.8 %) for the evaluated lap, against 94.91 s in the v6 regression run; the difference is inside the test tolerance and was not investigated. Figures and tables in the README and the report use the final run.
+- v8: the lap-time sensitivity table, the sector times and the corner-class figures were measured with the v7 line (94.93 s) and have not been repeated; the signs are expected to hold.
 - Between v3 and v4 two changes were made together (aero and wheel FZMAX), so their individual effects are not separated.

@@ -97,7 +97,7 @@ Total: 45 entries.
 | ID | Parameter | Value | Unit | Status | Where used | Source / rationale |
 |---|---|---|---|---|---|---|
 | K-01 | Circuit centerline | OpenStreetMap, about 5857 m, resampled every 2 m |  | SOURCED | f1_track_curvature | OpenStreetMap contributors, ODbL. |
-| K-02 | Reference (race) line | minimum curvature, +/- 4 m half-width, about 5788 m |  | ESTIMATED | f1_make_raceline.py; f1_load_raceline | OSM has no track width; 4 m is a reasonable, conservative value. |
+| K-02 | Reference (race) line | curvature-peak-weighted (p = 3), +/- 4 m half-width, about 5804 m |  | ESTIMATED | silverstone_raceline.csv (precomputed); f1_load_raceline | OSM has no track width; 4 m is a reasonable, conservative value. |
 | K-03 | Curvature smoothing for the speed profile | moving max then moving mean, 5 points (10 m) |  | DESIGN | f1_speed_profile | Removes OSM noise while keeping each corner's peak. |
 
 ### Speed profile

@@ -12,10 +12,10 @@
 % improve the model on purpose (e.g. more grip), update the BASELINE.
 
 %% --- Baseline and thresholds -------------------------------------------
-base.lapTime   = 94.7;    % [s] v4 + LSD + Tair 288.15 K (rho consistent with the profile): 94.71 s. (Before, Tair 273 K: 95.16 s. (v4 with open Active Differential: 94.86 s. (v3, ClA 2.7: 102.96 s. (v3 with h_cg 0.275: 102.45 s; v2 with useFC = false: 109.3 s)
+base.lapTime   = 89.85;   % [s] v8: race line with curvature-peak weighting (p = 3), measured lap 2: 89.85 s. (v7 line, minimum curvature: 94.93 s; earlier history: v4 + LSD 94.71 s.)
 tol.lapTime    = 1.5;     % [s] tolerance; a larger change = the behavior changed
 tol.latErrMax  = 3.0;     % [m] maximum lateral error (v4 + Tair 288 K: 2.03 m; before 1.94 m, v3: 2.2 m, in the tight corner at ~1125 m; racing line half-width 4 m)
-tol.latErrP95  = 1.8;     % [m] 95 % of the time the car follows the line with this precision (v4 + Tair 288 K: 1.56 m; before 1.51 m, v3: 1.55 m)
+tol.latErrP95  = 1.8;     % [m] 95 % of the time the car follows the line with this precision (v4 + Tair 288 K: 1.56 m; before 1.51 m, v3: 1.55 m; v8 line: 1.67 m)
 tol.lapSpread  = 1.5;     % [s] difference between consecutive complete laps (repeatability)
 tol.lenErr     = 0.03;    % [-] the distance traveled must be +-3 % of the circuit length
 tol.vMax       = 95;      % [m/s] ~342 km/h: above this, something is not physical
